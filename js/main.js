@@ -1,7 +1,7 @@
 enchant();
 
 let game, player, enemies;
-let survivalTime = 0, gameActive = false, enemyInterval;
+let gameActive = false, enemyInterval, survivalTime = 0;
 
 // Player
 let Player = enchant.Class.create(enchant.Sprite, {
@@ -93,8 +93,7 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 		this.y = y;
 		
 		this.addEventListener('enterframe', function () {
-			// this.move();
-			console.log(player.bullets)
+			this.move();
 			if (this.x < 0 || this.x > game.width) {
 				this.remove();
 				player.bullets.splice(player.bullets.indexOf(this), 1);
@@ -109,9 +108,9 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 			}
 		});
 	},
-//	move: function() {
-//		this.x += 40 * player.scaleX;
-//	},
+	move: function() {
+		this.x += 40 * player.scaleX;
+	},
 	remove: function() {
 		game.rootScene.removeChild(this);
 		delete this;
@@ -122,6 +121,7 @@ window.onload = function() {
 	game = new Game(480, 320);
 	game.preload('images/chara1.png', 'images/bullet.png');
 	game.keybind(32, "space");
+	game.fps = 30;
 	
 	game.onload = function() {
 		player = new Player();
@@ -129,34 +129,41 @@ window.onload = function() {
 		
 		enemies = [];
 		
-		player.addEventListener('enterframe', function() {
-			if (game.input.left || game.input.right || game.input.up || game.input.down || game.input.space) {
-				if (!gameActive) {
-					enemyInterval = setInterval(function() {
-							var enemy = new Enemy(Math.random() * 480, Math.random() * 320);
-							game.rootScene.addChild(enemy);
-							enemies.push(enemy);
-						}, 3000);
-					gameActive = true;
-				}
+		this.addEventListener('keydown', function() {
+			if (!gameActive) {
+				enemyInterval = setInterval(function() {
+						var enemy = new Enemy(Math.random() * 480, Math.random() * 320);
+						game.rootScene.addChild(enemy);
+						enemies.push(enemy);
+					}, 3000 - (survivalTime % 30));
+				gameActive = true;
 			}
 		});
 		
 		let timeLabel = new Label('Survival Time: 00 : 00');
+		let milliSeconds = 0, seconds = 0, minutes = 0;
 		timeLabel.x = 10;
 		timeLabel.y = 10;
 		timeLabel.color = '#fff';
 		timeLabel.addEventListener('enterframe', function(){
 			survivalTime++;
+			milliSeconds++;
 			
 			// minutes and seconds 
-			let minutes = Math.floor(survivalTime / 60);
-			let seconds = survivalTime % 60;
+			if (milliSeconds > game.fps) {
+				seconds++;
+				milliSeconds = 0;
+			}
+			if (seconds > 60) {
+				minutes++;
+				milliSeconds = 0;
+				seconds = 0;
+			}
 			
 			this.text = `Survival Time: ${minutes < 10 ? '0'+minutes : minutes} : ${seconds < 10 ? '0'+seconds : seconds}`;
 		});
 		game.rootScene.addChild(timeLabel);
 	};
 	
-	game.start();
+	game.debug();
 };
