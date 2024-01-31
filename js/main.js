@@ -1,6 +1,7 @@
 enchant();
 
-let game, player, enemies, survivalTime = 0;
+let game, player, enemies;
+let survivalTime = 0, gameActive = false, enemyInterval;
 
 // Player
 let Player = enchant.Class.create(enchant.Sprite, {
@@ -16,15 +17,16 @@ let Player = enchant.Class.create(enchant.Sprite, {
 			if(game.input.left && this.x > 0) {
 				this.x -= 2;
 				this.scaleX = -1;
+				this.bullets = [];
 			}
-			if(game.input.right && this.x < 288) {
+			if(game.input.right && this.x < (game.width-player.width)) {
 				this.x += 2;
 				this.scaleX = 1;
 			}
 			if(game.input.up && this.y > 0) {
 				this.y -= 2;
 			}
-			if(game.input.down && this.y < 288) {
+			if(game.input.down && this.y < (game.height-player.height)) {
 				this.y += 2;
 			}
 			
@@ -71,6 +73,7 @@ let Enemy = enchant.Class.create(enchant.Sprite, {
 			
 			if(player.within(this, 8)) {
 				game.end();
+				clearInterval(enemyInterval);
 			}
 		});
 	}, 
@@ -90,15 +93,25 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 		this.y = y;
 		
 		this.addEventListener('enterframe', function () {
-			game.rootScene.childNodes.forEach(function (enemy) {
-				if (this.intersect(enemy)) {
+			// this.move();
+			console.log(player.bullets)
+			if (this.x < 0 || this.x > game.width) {
+				this.remove();
+				player.bullets.splice(player.bullets.indexOf(this), 1);
+			}
+			
+			for (var i in enemies) {
+				if(enemies[i].intersect(this)) {
 					this.remove();
-					enemy.remove();
-					
+					enemies[i].remove();
+					player.bullets.splice(player.bullets.indexOf(this), 1);
 				}
-			}.bind(this));
+			}
 		});
 	},
+//	move: function() {
+//		this.x += 40 * player.scaleX;
+//	},
 	remove: function() {
 		game.rootScene.removeChild(this);
 		delete this;
@@ -106,7 +119,7 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 });
 
 window.onload = function() {
-	game = new Game(320, 320);
+	game = new Game(480, 320);
 	game.preload('images/chara1.png', 'images/bullet.png');
 	game.keybind(32, "space");
 	
@@ -115,22 +128,35 @@ window.onload = function() {
 		game.rootScene.addChild(player);
 		
 		enemies = [];
-		setInterval(function() {
-			var enemy = new Enemy(Math.random() * 320, Math.random() * 320);
-			game.rootScene.addChild(enemy);
-			enemies.push(enemy);
-		}, 3000);
 		
-		let timeLabel = new Label('Survival Time: 0');
+		player.addEventListener('enterframe', function() {
+			if (game.input.left || game.input.right || game.input.up || game.input.down || game.input.space) {
+				if (!gameActive) {
+					enemyInterval = setInterval(function() {
+							var enemy = new Enemy(Math.random() * 480, Math.random() * 320);
+							game.rootScene.addChild(enemy);
+							enemies.push(enemy);
+						}, 3000);
+					gameActive = true;
+				}
+			}
+		});
+		
+		let timeLabel = new Label('Survival Time: 00 : 00');
 		timeLabel.x = 10;
 		timeLabel.y = 10;
 		timeLabel.color = '#fff';
 		timeLabel.addEventListener('enterframe', function(){
-			this.text = 'Survival Time: ' + survivalTime;
+			survivalTime++;
+			
+			// minutes and seconds 
+			let minutes = Math.floor(survivalTime / 60);
+			let seconds = survivalTime % 60;
+			
+			this.text = `Survival Time: ${minutes < 10 ? '0'+minutes : minutes} : ${seconds < 10 ? '0'+seconds : seconds}`;
 		});
 		game.rootScene.addChild(timeLabel);
 	};
 	
 	game.start();
 };
-
