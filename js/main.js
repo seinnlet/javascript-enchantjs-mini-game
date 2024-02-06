@@ -28,7 +28,7 @@ let Player = enchant.Class.create(enchant.Sprite, {
 				this.y += 2;
 			}
 			if(game.input.space && game.frame % 5 == 0) {
-				let bullet = new PlayerBullet(this.x, this.y);
+				let bullet = new Bullet(this.x, this.y);
 			}
 		});
 	}
@@ -77,40 +77,34 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 		
 		let bulletX;
 		if(player.scaleX == -1) {
-			this.x = player.x - 16;
+			this.x = x - 16;
 			this.direction = -1;
 		}	
 		if(player.scaleX == 1) {
-			this.x = player.x + 32;
+			this.x = x + 32;
 			this.direction = 1;
 		}
 		this.y = y + 8;
 		
 		this.moveSpeed = 10;
 		this.addEventListener('enterframe', function () {
-				this.x += this.moveSpeed * this.direction;
-				if (this.x < -this.width || this.x > game.width) {
-						this.remove();
-				}
-		});
-		game.rootScene.addChild(this);
-	},
-	remove: function () {
-			game.rootScene.removeChild(this);
-			delete this;
-	}
-});
-
-let PlayerBullet = enchant.Class.create(Bullet, {
-	initialize: function (x, y) {
-		Bullet.call(this, x, y);
-		this.addEventListener('enterframe', function () {
+			
+			this.x += this.moveSpeed * this.direction;
+			if (this.x < -this.width || this.x > game.width) {
+				this.remove();
+			}
+		
 			for (let i in enemies) {
 				if(enemies[i].intersect(this)) {
 					enemies[i].remove();
 				}
 			}
 		});
+		game.rootScene.addChild(this);
+	},
+	remove: function () {
+			game.rootScene.removeChild(this);
+			delete this;
 	}
 });
 
