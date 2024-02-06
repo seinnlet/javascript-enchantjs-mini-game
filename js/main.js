@@ -127,20 +127,18 @@ window.onload = function() {
 		game.rootScene.addChild(player);
 		
 		enemies = [];
-		
 		let generateEnemyTime = 3000;
-		
-		this.addEventListener('keydown', function() {
-			if (!gameActive) {
-				enemyInterval = setInterval(createEnemy, generateEnemyTime);
-				gameActive = true;
-			}
-		});
 		
 		// 10秒までは 3s、10-20秒の間は 2s、20秒以上は 1sごとにEnemyを作る
 		game.rootScene.addEventListener('enterframe', function() {
+			
+			if (survivalTime > 5 && !gameActive) {	// 始め
+				enemyInterval = setInterval(createEnemy, generateEnemyTime);
+				gameActive = true;
+			}
 			if (survivalTime % 300 == 0 && generateEnemyTime > 1000) {
 				generateEnemyTime -= 1000;
+				console.log(survivalTime);
 				clearInterval(enemyInterval);
 				enemyInterval = setInterval(createEnemy, generateEnemyTime);
 			}
@@ -152,10 +150,9 @@ window.onload = function() {
 		timeLabel.y = 10;
 		timeLabel.color = '#fff';
 		timeLabel.addEventListener('enterframe', function(){
-			if (gameActive) {
-				survivalTime++;
-				milliSeconds++;
-			}
+			survivalTime++;
+			milliSeconds++;
+			
 			// minutes and seconds 
 			if (milliSeconds > game.fps) {
 				seconds++;
