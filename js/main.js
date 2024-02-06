@@ -1,7 +1,7 @@
 enchant();
 
-let game, player, enemies;
-let gameActive = false, enemyInterval, survivalTime = 0;
+let game, player, enemies, enemyInterval;
+let gameActive = false, survivalTime = 0;
 
 // Player
 let Player = enchant.Class.create(enchant.Sprite, {
@@ -11,7 +11,6 @@ let Player = enchant.Class.create(enchant.Sprite, {
 		this.frame = [0,0,1,1,0,0,2,2];
 		this.x = game.width / 2 - this.width / 2;
 		this.y = 240 - this.height / 2;
-		this.bullets = [];
 		
 		this.addEventListener('enterframe', function() {
 			if(game.input.left && this.x > 0) {
