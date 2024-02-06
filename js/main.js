@@ -141,7 +141,6 @@ window.onload = function() {
 		game.rootScene.addEventListener('enterframe', function() {
 			if (survivalTime % 300 == 0 && generateEnemyTime > 1000) {
 				generateEnemyTime -= 1000;
-				console.log(generateEnemyTime);
 				clearInterval(enemyInterval);
 				enemyInterval = setInterval(createEnemy, generateEnemyTime);
 			}
@@ -189,7 +188,6 @@ function createEnemy() {
 			y = Math.random() < 0.5 ? -margin : game.height + margin;
 	}
 	var enemy = new Enemy(x, y);
-	console.log(x, y);
 	game.rootScene.addChild(enemy);
 	enemies.push(enemy);
 }
