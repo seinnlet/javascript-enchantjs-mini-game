@@ -139,7 +139,7 @@ window.onload = function() {
 		
 		// 10秒までは 3s、10-20秒の間は 2s、20秒以上は 1sごとにEnemyを作る
 		game.rootScene.addEventListener('enterframe', function() {
-			if (survivalTime % 300 == 0 && generateEnemyTime >= 1000) {
+			if (survivalTime % 300 == 0 && generateEnemyTime > 1000) {
 				generateEnemyTime -= 1000;
 				console.log(generateEnemyTime);
 				clearInterval(enemyInterval);
@@ -177,7 +177,19 @@ window.onload = function() {
 };
 
 function createEnemy() {
-	var enemy = new Enemy(Math.random() * 480, Math.random() * 320);
+	let margin = 60;
+	let x, y;
+	if (Math.random() < 0.5) {	// 上下、左右を決めるため
+			// 左右からでる
+			x = Math.random() < 0.5 ? -margin : game.width + margin;
+			y = Math.floor(Math.random() * (game.height + 2 * margin) - margin);
+	} else {
+			// 上下からでる
+			x = Math.floor(Math.random() * (game.width + 2 * margin) - margin);
+			y = Math.random() < 0.5 ? -margin : game.height + margin;
+	}
+	var enemy = new Enemy(x, y);
+	console.log(x, y);
 	game.rootScene.addChild(enemy);
 	enemies.push(enemy);
 }
