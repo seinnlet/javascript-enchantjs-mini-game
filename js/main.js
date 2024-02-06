@@ -134,7 +134,6 @@ window.onload = function() {
 			if (!gameActive) {
 				enemyInterval = setInterval(createEnemy, generateEnemyTime);
 				gameActive = true;
-				console.log("Created")
 			}
 		});
 		
