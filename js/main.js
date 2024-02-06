@@ -138,7 +138,6 @@ window.onload = function() {
 			}
 			if (survivalTime % 300 == 0 && generateEnemyTime > 1000) {
 				generateEnemyTime -= 1000;
-				console.log(survivalTime);
 				clearInterval(enemyInterval);
 				enemyInterval = setInterval(createEnemy, generateEnemyTime);
 			}
