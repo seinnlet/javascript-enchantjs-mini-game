@@ -17,7 +17,6 @@ let Player = enchant.Class.create(enchant.Sprite, {
 			if(game.input.left && this.x > 0) {
 				this.x -= 2;
 				this.scaleX = -1;
-				this.bullets = [];
 			}
 			if(game.input.right && this.x < (game.width-player.width)) {
 				this.x += 2;
@@ -109,7 +108,7 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 		});
 	},
 	move: function() {
-		this.x += 40 * player.scaleX;
+		this.x += 30 * player.scaleX;
 	},
 	remove: function() {
 		game.rootScene.removeChild(this);
@@ -129,14 +128,23 @@ window.onload = function() {
 		
 		enemies = [];
 		
+		let generateEnemyTime = 3000;
+		
 		this.addEventListener('keydown', function() {
 			if (!gameActive) {
-				enemyInterval = setInterval(function() {
-						var enemy = new Enemy(Math.random() * 480, Math.random() * 320);
-						game.rootScene.addChild(enemy);
-						enemies.push(enemy);
-					}, 3000 - (survivalTime % 30));
+				enemyInterval = setInterval(createEnemy, generateEnemyTime);
 				gameActive = true;
+				console.log("Created")
+			}
+		});
+		
+		// 10秒までは 3s、10-20秒の間は 2s、20秒以上は 1sごとにEnemyを作る
+		game.rootScene.addEventListener('enterframe', function() {
+			if (survivalTime % 300 == 0 && generateEnemyTime >= 1000) {
+				generateEnemyTime -= 1000;
+				console.log(generateEnemyTime);
+				clearInterval(enemyInterval);
+				enemyInterval = setInterval(createEnemy, generateEnemyTime);
 			}
 		});
 		
@@ -146,9 +154,10 @@ window.onload = function() {
 		timeLabel.y = 10;
 		timeLabel.color = '#fff';
 		timeLabel.addEventListener('enterframe', function(){
-			survivalTime++;
-			milliSeconds++;
-			
+			if (gameActive) {
+				survivalTime++;
+				milliSeconds++;
+			}
 			// minutes and seconds 
 			if (milliSeconds > game.fps) {
 				seconds++;
@@ -167,3 +176,9 @@ window.onload = function() {
 	
 	game.debug();
 };
+
+function createEnemy() {
+	var enemy = new Enemy(Math.random() * 480, Math.random() * 320);
+	game.rootScene.addChild(enemy);
+	enemies.push(enemy);
+}
