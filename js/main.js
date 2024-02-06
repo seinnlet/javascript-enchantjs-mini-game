@@ -28,23 +28,10 @@ let Player = enchant.Class.create(enchant.Sprite, {
 			if(game.input.down && this.y < (game.height-player.height)) {
 				this.y += 2;
 			}
-			
-			if(game.input.space) {
-				this.shootBullet();
+			if(game.input.space && game.frame % 5 == 0) {
+				let bullet = new PlayerBullet(this.x, this.y);
 			}
 		});
-	},
-	shootBullet: function() {
-		let bulletX;
-		if(this.scaleX == -1) {
-			bulletX = this.x - 16;
-		}	
-		if(this.scaleX == 1) {
-			bulletX = this.x + 32;
-		}
-		let bullet = new Bullet(bulletX, this.y + 8);
-		game.rootScene.addChild(bullet);
-		this.bullets.push(bullet);
 	}
 });
 
@@ -84,35 +71,47 @@ let Enemy = enchant.Class.create(enchant.Sprite, {
 
 // Bullet
 let Bullet = enchant.Class.create(enchant.Sprite, {
-	initialize: function(x, y) {
-		Sprite.call(this, 16, 16);
+	initialize: function (x, y) {
+		enchant.Sprite.call(this, 16, 16);
 		this.image = game.assets['images/bullet.png'];
 		this.frame = 54;
-		this.x = x;
-		this.y = y;
 		
+		let bulletX;
+		if(player.scaleX == -1) {
+			this.x = player.x - 16;
+			this.direction = -1;
+		}	
+		if(player.scaleX == 1) {
+			this.x = player.x + 32;
+			this.direction = 1;
+		}
+		this.y = y + 8;
+		
+		this.moveSpeed = 10;
 		this.addEventListener('enterframe', function () {
-			this.move();
-			if (this.x < 0 || this.x > game.width) {
-				this.remove();
-				player.bullets.splice(player.bullets.indexOf(this), 1);
-			}
-			
-			for (var i in enemies) {
+				this.x += this.moveSpeed * this.direction;
+				if (this.x < -this.width || this.x > game.width) {
+						this.remove();
+				}
+		});
+		game.rootScene.addChild(this);
+	},
+	remove: function () {
+			game.rootScene.removeChild(this);
+			delete this;
+	}
+});
+
+let PlayerBullet = enchant.Class.create(Bullet, {
+	initialize: function (x, y) {
+		Bullet.call(this, x, y);
+		this.addEventListener('enterframe', function () {
+			for (let i in enemies) {
 				if(enemies[i].intersect(this)) {
-					this.remove();
 					enemies[i].remove();
-					player.bullets.splice(player.bullets.indexOf(this), 1);
 				}
 			}
 		});
-	},
-	move: function() {
-		this.x += 30 * player.scaleX;
-	},
-	remove: function() {
-		game.rootScene.removeChild(this);
-		delete this;
 	}
 });
 
