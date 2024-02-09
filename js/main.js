@@ -1,6 +1,6 @@
 enchant();
 
-let game, player, enemies, enemyInterval, bottles;
+let game, player, enemies, bottles;
 let gameActive = false, survivalTime = 0;
 
 // Player
@@ -58,9 +58,10 @@ let Enemy = enchant.Class.create(enchant.Sprite, {
 			
 			if(player.within(this, 8)) {
 				game.end();
-				clearInterval(enemyInterval);
 			}
+			
 		});
+		game.rootScene.addChild(this);
 	}, 
 	remove: function() {
 		game.rootScene.removeChild(this);
@@ -99,7 +100,6 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 					enemies[i].remove();
 				}
 			}
-			
 		});
 		game.rootScene.addChild(this);
 	},
@@ -143,20 +143,18 @@ window.onload = function() {
 		player = new Player();
 		game.rootScene.addChild(player);
 		
-		enemies = [];
-		let generateEnemyTime = 3000;
-		// 10秒までは 3s、10-20秒の間は 2s、20秒以上は 1sごとにEnemyを作る
+		enemies = new Array();
+		let generateEnemyTime = 90; // 3sごとにEnemyを作る
+		
 		game.rootScene.addEventListener('enterframe', function() {
 			
-			if (survivalTime > 5 && !gameActive) {	// 始め
-				enemyInterval = setInterval(createEnemy, generateEnemyTime);
-				gameActive = true;
+			if (survivalTime % 300 == 0 && generateEnemyTime > 15) {
+				generateEnemyTime -= 15;
 			}
-			if (survivalTime % 300 == 0 && generateEnemyTime > 1000) {
-				generateEnemyTime -= 1000;
-				clearInterval(enemyInterval);
-				enemyInterval = setInterval(createEnemy, generateEnemyTime);
+			if (survivalTime != 0 && survivalTime % generateEnemyTime == 0) {
+				createEnemy();
 			}
+			
 		});
 		
 		let timeLabel = new Label('Survival Time: 00 : 00');
@@ -191,15 +189,15 @@ function createEnemy() {
 	let margin = 60;
 	let x, y;
 	if (Math.random() < 0.5) {	// 上下、左右を決めるため
-			// 左右からでる
-			x = Math.random() < 0.5 ? -margin : game.width + margin;
-			y = Math.floor(Math.random() * (game.height + 2 * margin) - margin);
+		// 左右からでる
+		x = Math.random() < 0.5 ? -margin : game.width + margin;
+		y = Math.floor(Math.random() * (game.height + 2 * margin) - margin);
 	} else {
-			// 上下からでる
-			x = Math.floor(Math.random() * (game.width + 2 * margin) - margin);
-			y = Math.random() < 0.5 ? -margin : game.height + margin;
+		// 上下からでる
+		x = Math.floor(Math.random() * (game.width + 2 * margin) - margin);
+		y = Math.random() < 0.5 ? -margin : game.height + margin;
 	}
-	var enemy = new Enemy(x, y);
-	game.rootScene.addChild(enemy);
-	enemies.push(enemy);
+	let enemy = new Enemy(x, y);
+	enemy.key = game.frame;
+	enemies[game.frame] = enemy;
 }
