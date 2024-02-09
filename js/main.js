@@ -1,7 +1,7 @@
 enchant();
 
 let game, player, enemies, bottles;
-let survivalTime = 0, gameScore = 0;
+let survivalTime = 0, gameScore = 0, bottleTime = 0;
 
 // Player
 let Player = enchant.Class.create(enchant.Sprite, {
@@ -12,23 +12,47 @@ let Player = enchant.Class.create(enchant.Sprite, {
 		this.x = game.width / 2 - this.width / 2;
 		this.y = 240 - this.height / 2;
 		
+		let playerSpeed = 2, bulletFrame = 8;
 		this.addEventListener('enterframe', function() {
+			
+			if (bottleTime == 0) {
+				playerSpeed = 2;
+				bulletFrame = 8;
+			}
+			if (bottleTime == 300) {
+				playerSpeed = 3;
+				bulletFrame = 5;
+			}
+			if (bottleTime <= 300 && bottleTime > 0) {
+				bottleTime--;
+			}
+			console.log("Time " + bottleTime)
+			console.log("playerSpeed " + playerSpeed)
+			console.log("bulletFrame" + bulletFrame)
+			
 			if(game.input.left && this.x > 0) {
-				this.x -= 2;
+				this.x -= playerSpeed;
 				this.scaleX = -1;
 			}
 			if(game.input.right && this.x < (game.width-player.width)) {
-				this.x += 2;
+				this.x += playerSpeed;
 				this.scaleX = 1;
 			}
 			if(game.input.up && this.y > 0) {
-				this.y -= 2;
+				this.y -= playerSpeed;
 			}
 			if(game.input.down && this.y < (game.height-player.height)) {
-				this.y += 2;
+				this.y += playerSpeed;
 			}
-			if(game.input.space && game.frame % 5 == 0) {
+			if(game.input.space && game.frame % bulletFrame == 0) {
 				let bullet = new Bullet(this.x, this.y);
+			}
+			
+			for (let i in bottles) {
+				if(bottles[i].intersect(this)) {
+					bottles[i].remove();
+					bottleTime = 300;
+				}
 			}
 		});
 	}
@@ -120,6 +144,10 @@ let SpeedBottle = enchant.Class.create(enchant.Sprite, {
 		this.y = y;
 		
 		game.rootScene.addChild(this);
+	}, 
+	remove: function() {
+		game.rootScene.removeChild(this);
+		bottles.pop(this);
 	}
 });
 
@@ -131,12 +159,9 @@ window.onload = function() {
 	
 	game.onload = function() {
 		bottles = [];
-		let bottleX, bottleY;
 		game.rootScene.addEventListener('enterframe', function() {
-			if (survivalTime != 0 && survivalTime % 450 == 0) {
-				bottleX = Math.floor(Math.random() * (game.width - 16));
-				bottleY = Math.floor(Math.random() * (game.height - 16));
-				bottle = new SpeedBottle(bottleX, bottleY);
+			if (survivalTime != 0 && survivalTime % 600 == 0 && bottles.length < 1) {
+				let bottle = new SpeedBottle(randomNumber(game.width - 16), randomNumber(game.height - 16));
 				bottles.push(bottle);
 			}
 		});
@@ -170,7 +195,12 @@ window.onload = function() {
 			minutes = Math.floor(survivalTime / (game.fps * 60));
 			seconds = Math.floor((survivalTime / game.fps) % 60);
 			
-			this.text = `Survival Time: ${minutes < 10 ? '0'+minutes : minutes} : ${seconds < 10 ? '0'+seconds : seconds}<br>Score: ${gameScore}`;
+			this.text = `Survival Time: ${minutes < 10 ? '0'+minutes : minutes} : ${seconds < 10 ? '0'+seconds 
+			: seconds}<br>Score: ${gameScore}<br>`;
+			
+			if (bottleTime > 0) {
+				this.text += `Speed Up: ${Math.round((bottleTime / game.fps) % 60)}s`;
+			}
 		});
 		game.rootScene.addChild(labels);
 	};
@@ -193,4 +223,8 @@ function createEnemy() {
 	let enemy = new Enemy(x, y);
 	enemy.key = game.frame;
 	enemies[game.frame] = enemy;
+}
+
+function randomNumber(limits) {
+	return Math.floor(Math.random() * (limits));
 }
