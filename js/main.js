@@ -1,6 +1,6 @@
 enchant();
 
-let game, player, enemies, enemyInterval;
+let game, player, enemies, enemyInterval, bottles;
 let gameActive = false, survivalTime = 0;
 
 // Player
@@ -71,7 +71,7 @@ let Enemy = enchant.Class.create(enchant.Sprite, {
 // Bullet
 let Bullet = enchant.Class.create(enchant.Sprite, {
 	initialize: function (x, y) {
-		enchant.Sprite.call(this, 16, 16);
+		Sprite.call(this, 16, 16);
 		this.image = game.assets['images/bullet.png'];
 		this.frame = 54;
 		
@@ -85,26 +85,40 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 			this.direction = 1;
 		}
 		this.y = y + 8;
-		
 		this.moveSpeed = 10;
+		
 		this.addEventListener('enterframe', function () {
-			
 			this.x += this.moveSpeed * this.direction;
-			if (this.x < -this.width || this.x > game.width) {
+			
+			if (this.x < 0 || this.x > game.width) {
 				this.remove();
 			}
-		
+			
 			for (let i in enemies) {
 				if(enemies[i].intersect(this)) {
 					enemies[i].remove();
 				}
 			}
+			
 		});
 		game.rootScene.addChild(this);
 	},
 	remove: function () {
 			game.rootScene.removeChild(this);
 			delete this;
+	}
+});
+
+// SpeedBottle 
+let SpeedBottle = enchant.Class.create(enchant.Sprite, {
+	initialize: function (x, y) {
+		Sprite.call(this, 16, 16);
+		this.image = game.assets['images/bullet.png'];
+		this.frame = 12;
+		this.x = x;
+		this.y = y;
+		
+		game.rootScene.addChild(this);
 	}
 });
 
@@ -115,12 +129,22 @@ window.onload = function() {
 	game.fps = 30;
 	
 	game.onload = function() {
+		bottles = [];
+		let bottleX, bottleY;
+		game.rootScene.addEventListener('enterframe', function() {
+			if (survivalTime != 0 && survivalTime % 450 == 0) {
+				bottleX = Math.floor(Math.random() * (game.width - 16));
+				bottleY = Math.floor(Math.random() * (game.height - 16));
+				bottle = new SpeedBottle(bottleX, bottleY);
+				bottles.push(bottle);
+			}
+		});
+		
 		player = new Player();
 		game.rootScene.addChild(player);
 		
 		enemies = [];
 		let generateEnemyTime = 3000;
-		
 		// 10秒までは 3s、10-20秒の間は 2s、20秒以上は 1sごとにEnemyを作る
 		game.rootScene.addEventListener('enterframe', function() {
 			
