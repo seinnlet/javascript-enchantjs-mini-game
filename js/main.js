@@ -133,20 +133,27 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 	}
 });
 
-// SpeedBottle 
-let SpeedBottle = enchant.Class.create(enchant.Sprite, {
-	initialize: function (x, y) {
+// Item Class 
+let Item = enchant.Class.create(enchant.Sprite, {
+	initialize: function (x, y, frame) {
 		Sprite.call(this, 16, 16);
 		this.image = game.assets['images/bullet.png'];
-		this.frame = 12;
+		this.frame = frame;
 		this.x = x;
 		this.y = y;
 		
+		this.addEventListener('enterframe', function () {
+			if (this.frame == 30 && this.intersect(player)) {
+				this.remove();
+				gameScore += 100;
+			}
+		});
 		game.rootScene.addChild(this);
 	}, 
 	remove: function() {
 		game.rootScene.removeChild(this);
-		bottles.pop(this);
+		if (this.frame == 12) bottles.pop(this);
+		if (this.frame == 30) delete this;
 	}
 });
 
@@ -157,22 +164,26 @@ window.onload = function() {
 	game.fps = 30;
 	
 	game.onload = function() {
-		bottles = [];
-		game.rootScene.addEventListener('enterframe', function() {
-			// スピードアップボトルは2sごとに出てくる、Sceneで1個のみ
-			if (survivalTime != 0 && survivalTime % 600 == 0 && bottles.length < 1) {
-				let bottle = new SpeedBottle(randomNumber(game.width - 16), randomNumber(game.height - 16));
-				bottles.push(bottle);
-			}
-		});
-		
 		player = new Player();
 		
+		bottles = [];
 		enemies = new Array();
 		let generateEnemyTime = 90; // 最初は3sごとにEnemyが出てくる
 		
 		game.rootScene.addEventListener('enterframe', function() {
 			
+			// スピードアップボトルは15sごとに出てくる、Sceneで1個のみ
+			if (survivalTime != 0 && survivalTime % 450 == 0 && bottles.length < 1) {
+				let bottle = new Item(randomNumber(game.width - 16), randomNumber(game.height - 16), 12);
+				bottles.push(bottle);
+			}
+			
+			// Coin 20sごとに出てくる、100ポイントもらえる
+			if (survivalTime != 0 && survivalTime % 600 == 0) {
+				let coin = new Item(randomNumber(game.width - 16), randomNumber(game.height - 16), 30);
+			}
+			
+			// Enemy出てくるのを早くする
 			if (survivalTime % 150 == 0 && generateEnemyTime > 15) {
 				generateEnemyTime -= 15;
 			}
@@ -203,7 +214,7 @@ window.onload = function() {
 		game.rootScene.addChild(labels);
 	};
 	
-	game.debug();
+	game.start();
 };
 
 function createEnemy() {
