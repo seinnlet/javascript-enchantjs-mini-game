@@ -158,29 +158,21 @@ window.onload = function() {
 			
 		});
 		
-		let timeLabel = new Label('Survival Time: 00 : 00<br>Score: 0');
-		let milliSeconds = 0, seconds = 0, minutes = 0;
-		timeLabel.x = 10;
-		timeLabel.y = 10;
-		timeLabel.color = '#fff';
-		timeLabel.addEventListener('enterframe', function(){
+		let labels = new Label('Survival Time: 00 : 00<br>Score: 0');
+		let seconds = 0, minutes = 0;
+		labels.x = 10;
+		labels.y = 10;
+		labels.color = '#fff';
+		labels.addEventListener('enterframe', function(){
 			survivalTime++;
-			milliSeconds++;
 			
 			// minutes and seconds 
-			if (milliSeconds > game.fps) {
-				seconds++;
-				milliSeconds = 0;
-			}
-			if (seconds > 60) {
-				minutes++;
-				milliSeconds = 0;
-				seconds = 0;
-			}
+			minutes = Math.floor(survivalTime / (game.fps * 60));
+			seconds = Math.floor((survivalTime / game.fps) % 60);
 			
 			this.text = `Survival Time: ${minutes < 10 ? '0'+minutes : minutes} : ${seconds < 10 ? '0'+seconds : seconds}<br>Score: ${gameScore}`;
 		});
-		game.rootScene.addChild(timeLabel);
+		game.rootScene.addChild(labels);
 	};
 	
 	game.debug();
