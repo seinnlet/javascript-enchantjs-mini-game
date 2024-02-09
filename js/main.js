@@ -3,7 +3,7 @@ enchant();
 let game, player, enemies, bottles;
 let survivalTime = 0, gameScore = 0, bottleTime = 0;
 
-// Player
+// Player Class
 let Player = enchant.Class.create(enchant.Sprite, {
 	initialize: function() {
 		Sprite.call(this, 32, 32);
@@ -11,8 +11,8 @@ let Player = enchant.Class.create(enchant.Sprite, {
 		this.frame = [0,0,1,1,0,0,2,2];
 		this.x = game.width / 2 - this.width / 2;
 		this.y = 240 - this.height / 2;
-		
 		let playerSpeed = 2, bulletFrame = 8;
+		
 		this.addEventListener('enterframe', function() {
 			
 			if (bottleTime == 0) {
@@ -20,28 +20,25 @@ let Player = enchant.Class.create(enchant.Sprite, {
 				bulletFrame = 8;
 			}
 			if (bottleTime == 300) {
-				playerSpeed = 3;
-				bulletFrame = 5;
+				playerSpeed *= 2;
+				bulletFrame /= 2;
 			}
 			if (bottleTime <= 300 && bottleTime > 0) {
 				bottleTime--;
 			}
-			console.log("Time " + bottleTime)
-			console.log("playerSpeed " + playerSpeed)
-			console.log("bulletFrame" + bulletFrame)
 			
 			if(game.input.left && this.x > 0) {
 				this.x -= playerSpeed;
 				this.scaleX = -1;
 			}
-			if(game.input.right && this.x < (game.width-player.width)) {
+			if(game.input.right && this.x < (game.width - player.width)) {
 				this.x += playerSpeed;
 				this.scaleX = 1;
 			}
 			if(game.input.up && this.y > 0) {
 				this.y -= playerSpeed;
 			}
-			if(game.input.down && this.y < (game.height-player.height)) {
+			if(game.input.down && this.y < (game.height - player.height)) {
 				this.y += playerSpeed;
 			}
 			if(game.input.space && game.frame % bulletFrame == 0) {
@@ -55,10 +52,11 @@ let Player = enchant.Class.create(enchant.Sprite, {
 				}
 			}
 		});
+		game.rootScene.addChild(this);
 	}
 });
 
-// Enemy
+// Enemy Class
 let Enemy = enchant.Class.create(enchant.Sprite, {
 	initialize: function (x, y) {
 		Sprite.call(this, 32, 32);
@@ -70,7 +68,7 @@ let Enemy = enchant.Class.create(enchant.Sprite, {
 		this.addEventListener('enterframe', function() {
 			
 			let speed = 2;
-			var angle = Math.atan2(player.y - this.y, player.x - this.x);
+			let angle = Math.atan2(player.y - this.y, player.x - this.x);
 			this.x += speed * Math.cos(angle);
 			this.y += speed * Math.sin(angle);
 			if(this.x < player.x) {
@@ -80,7 +78,8 @@ let Enemy = enchant.Class.create(enchant.Sprite, {
 				this.scaleX = -1;
 			}
 			
-			if(player.within(this, 8)) {
+			if(player.within(this, 15)) {
+				player.frame = 3;
 				game.end();
 			}
 			
@@ -93,7 +92,7 @@ let Enemy = enchant.Class.create(enchant.Sprite, {
 	}
 });
 
-// Bullet
+// Bullet Class
 let Bullet = enchant.Class.create(enchant.Sprite, {
 	initialize: function (x, y) {
 		Sprite.call(this, 16, 16);
@@ -160,6 +159,7 @@ window.onload = function() {
 	game.onload = function() {
 		bottles = [];
 		game.rootScene.addEventListener('enterframe', function() {
+			// スピードアップボトルは2sごとに出てくる、Sceneで1個のみ
 			if (survivalTime != 0 && survivalTime % 600 == 0 && bottles.length < 1) {
 				let bottle = new SpeedBottle(randomNumber(game.width - 16), randomNumber(game.height - 16));
 				bottles.push(bottle);
@@ -167,20 +167,18 @@ window.onload = function() {
 		});
 		
 		player = new Player();
-		game.rootScene.addChild(player);
 		
 		enemies = new Array();
-		let generateEnemyTime = 90; // 3sごとにEnemyを作る
+		let generateEnemyTime = 90; // 最初は3sごとにEnemyが出てくる
 		
 		game.rootScene.addEventListener('enterframe', function() {
 			
-			if (survivalTime % 300 == 0 && generateEnemyTime > 15) {
+			if (survivalTime % 150 == 0 && generateEnemyTime > 15) {
 				generateEnemyTime -= 15;
 			}
 			if (survivalTime != 0 && survivalTime % generateEnemyTime == 0) {
 				createEnemy();
 			}
-			
 		});
 		
 		let labels = new Label('Survival Time: 00 : 00<br>Score: 0');
