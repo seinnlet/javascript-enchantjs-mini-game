@@ -1,7 +1,7 @@
 enchant();
 
 let game, player, enemies, bottles;
-let gameActive = false, survivalTime = 0;
+let survivalTime = 0, gameScore = 0;
 
 // Player
 let Player = enchant.Class.create(enchant.Sprite, {
@@ -98,6 +98,7 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 			for (let i in enemies) {
 				if(enemies[i].intersect(this)) {
 					enemies[i].remove();
+					gameScore += 10;
 				}
 			}
 		});
@@ -157,7 +158,7 @@ window.onload = function() {
 			
 		});
 		
-		let timeLabel = new Label('Survival Time: 00 : 00');
+		let timeLabel = new Label('Survival Time: 00 : 00<br>Score: 0');
 		let milliSeconds = 0, seconds = 0, minutes = 0;
 		timeLabel.x = 10;
 		timeLabel.y = 10;
@@ -177,7 +178,7 @@ window.onload = function() {
 				seconds = 0;
 			}
 			
-			this.text = `Survival Time: ${minutes < 10 ? '0'+minutes : minutes} : ${seconds < 10 ? '0'+seconds : seconds}`;
+			this.text = `Survival Time: ${minutes < 10 ? '0'+minutes : minutes} : ${seconds < 10 ? '0'+seconds : seconds}<br>Score: ${gameScore}`;
 		});
 		game.rootScene.addChild(timeLabel);
 	};
