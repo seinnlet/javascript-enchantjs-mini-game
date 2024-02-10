@@ -192,11 +192,12 @@ window.onload = function() {
 			}
 		});
 		
-		let labels = new Label('Survival Time: 00 : 00<br>Score: 0');
+		let labels = new Label('Press any Key to Start...');
 		let seconds = 0, minutes = 0;
 		labels.x = 10;
 		labels.y = 10;
 		labels.color = '#fff';
+		labels.font = "18px 'Source Code Pro'";
 		labels.addEventListener('enterframe', function(){
 			survivalTime++;
 			
