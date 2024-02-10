@@ -121,6 +121,7 @@ let Bullet = enchant.Class.create(enchant.Sprite, {
 			for (let i in enemies) {
 				if(enemies[i].intersect(this)) {
 					enemies[i].remove();
+					this.remove();
 					gameScore += 10;
 				}
 			}
