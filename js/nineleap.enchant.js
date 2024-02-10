@@ -6,6 +6,7 @@ enchant.nineleap.Game = enchant.Class.create(enchant.Game, {
             var game = this;
             this.startScene = new SplashScene();
             this.startScene.image = this.assets['images/start.png'];
+						this.startScene.label = 'Press any Key to Start...';
             this.startScene.addEventListener('touchend', function() {
                 if (game.currentScene == this) game.popScene();
             });
@@ -54,5 +55,23 @@ enchant.nineleap.SplashScene = enchant.Class.create(enchant.Scene, {
             sprite.y = (this.height - image.height) / 2;
             this.addChild(sprite);
         }
-    }
+    }, 
+		label: {
+			get: function() {
+            return this._label;
+        },
+        set: function(label) {
+            this._label = label;
+
+						let introLabel = new Label(label);
+						introLabel.x = (this.width - introLabel.width) / 2;
+						introLabel.y = (this.height - introLabel.height - 150) / 2;
+						console.log(introLabel.x)
+						console.log(introLabel.y)
+						introLabel.color = '#fff';
+						introLabel.textAlign = 'center';
+						introLabel.font = "18px 'Source Code Pro'";
+						this.addChild(introLabel);
+        }
+	}
 });

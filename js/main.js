@@ -158,7 +158,7 @@ let Item = enchant.Class.create(enchant.Sprite, {
 });
 
 window.onload = function() {
-	game = new Game(480, 320);
+	game = new Game(600, 320);
 	game.preload('images/chara1.png', 'images/bullet.png');
 	game.keybind(32, "space");
 	game.fps = 30;
@@ -192,7 +192,7 @@ window.onload = function() {
 			}
 		});
 		
-		let labels = new Label('Press any Key to Start...');
+		let labels = new Label();
 		let seconds = 0, minutes = 0;
 		labels.x = 10;
 		labels.y = 10;
